@@ -7,19 +7,57 @@
 import urllib
 from bs4 import BeautifulSoup
 import re
+import MySQLdb
+
 
 
 def main():
 
 	team_codes = ['cle','gsw']
+	team_codes = ['cle']
 
 	rosters = []
 	stats   = []
 	for code in team_codes:
+
 		roster = get_roster(code)
 		rosters.append(roster)
+		
 		for player in roster:
 			stats.append(get_stats(player.get('player_url')))
+
+	return
+
+
+db  = MySQLdb.connect(user="root",passwd="root",db="NBAPF")
+
+
+def load_roster(roster):
+	
+	for_insert = [(player.get("PID"),
+		       player.get("NAME"),
+		       player.get("TEAM")) for player in roster]
+	
+	c   = db.cursor()
+	c.executemany("""INSERT INTO PLAYERS (PID,NAME,TEAM)
+			VALUES (%s, %s, %s)""", for_insert)
+	c.close()
+	return
+
+def load_stats(stat):
+
+	for_insert = [(row.get("PID"),
+			row.get('DATE').split(' ')[-1] + '/15',
+			row.get('PTS'),
+			row.get('STL'),
+			row.get('REB'),
+			row.get('AST')) for row in stat]
+	c = db.cursor()
+	c.executemany("""INSERT INTO STATS (PID, GAMEID, POINTS, STEALS, REBOUNDS, ASSISTS)
+			VALUES ( %s, %s, %s, %s, %s, %s)""", for_insert)
+	c.close()
+	return
+
 
 def get_roster(team_code):
 	baseurl = 'http://espn.go.com/nba/team/roster/_/name/{}'.format(team_code)
@@ -33,7 +71,7 @@ def get_roster(team_code):
 	players = []
 	for tag in soup.find_all('tr',class_=re.compile('player')):
 		
-		player_info = {'team_code':team_code}
+		player_info = {'TEAM':team_code}
 		for idx,entry in enumerate(tag.find_all('td')):
 			player_info[headers[idx]] = entry.get_text()
 
@@ -41,7 +79,7 @@ def get_roster(team_code):
 		player_id   = player_link.split('/')[-2]
 
 		player_info['player_url'] = player_link
-		player_info['player_id']  = player_id
+		player_info['PID']  = player_id
 
 		players.append(player_info)
 	
@@ -65,7 +103,7 @@ def get_stats(player_url,full_stats=False):
 	stats = []
 	for tag in soup.find_all('tr',class_=re.compile('team')):
 		
-		game_stats = {'player_id':player_id}
+		game_stats = {'PID':player_id}
 		for idx,entry in enumerate(tag.find_all('td')):
 			game_stats[headers[idx]] = entry.get_text()
 		
