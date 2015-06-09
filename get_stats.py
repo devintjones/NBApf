@@ -10,6 +10,13 @@ import re
 import MySQLdb
 
 
+try:
+	with open("connection_params.json","r") as infile:
+		connection_params = json.load(infile)
+except:
+	SystemExit("couldnt find connection params file")
+
+db = MySQLdb.connect(**connection_params)
 
 def main():
 
@@ -21,15 +28,17 @@ def main():
 	for code in team_codes:
 
 		roster = get_roster(code)
+		load_roster(roster)
 		rosters.append(roster)
 		
 		for player in roster:
-			stats.append(get_stats(player.get('player_url')))
+			stat = get_stats(player.get('player_url'))
+			load_stats(stat)
+			stats.append(stat)
 
 	return
 
 
-db  = MySQLdb.connect(user="root",passwd="root",db="NBAPF")
 
 
 def load_roster(roster):
@@ -41,6 +50,7 @@ def load_roster(roster):
 	c   = db.cursor()
 	c.executemany("""INSERT INTO PLAYERS (PID,NAME,TEAM)
 			VALUES (%s, %s, %s)""", for_insert)
+	db.commit()
 	c.close()
 	return
 
@@ -55,6 +65,7 @@ def load_stats(stat):
 	c = db.cursor()
 	c.executemany("""INSERT INTO STATS (PID, GAMEID, POINTS, STEALS, REBOUNDS, ASSISTS)
 			VALUES ( %s, %s, %s, %s, %s, %s)""", for_insert)
+	db.commit()
 	c.close()
 	return
 
