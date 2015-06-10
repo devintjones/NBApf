@@ -70,6 +70,7 @@ def update_player_vals():
 				FROM STATS) a
 		GROUP BY s.PID;""")
 	db.commit()
+	c.close()
 	return
 
 
@@ -80,6 +81,7 @@ def generate_users():
 		c.execute("""insert into USERS (UID,NAME)
 				values ('{}','{}')""".format(i,name))
 		db.commit()
+	c.close()
 	return
 
 
@@ -102,6 +104,7 @@ def generate_pf():
 		c.executemany('''insert into PF
 				values (%s,%s)''',for_insert)
 		db.commit()
+	c.close()
 	return
 
 
@@ -118,6 +121,7 @@ def calc_pf_value():
 			on a.PID = b.PID
 			group by a.UID''')
 	db.commit()
+	c.close()
 	return
 
 
