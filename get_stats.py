@@ -212,6 +212,6 @@ def get_stats(player_url,full_stats=False):
 	return stats
 
 
-if __name__ == 'main':
+if __name__ == '__main__':
 	main()
 	pass
