@@ -4,10 +4,12 @@
 # author: Devin Jones
 # date: 6/4/2015
 
+import json
 import urllib
 from bs4 import BeautifulSoup
 import re
 import MySQLdb
+import random
 
 
 try:
@@ -18,10 +20,20 @@ except:
 
 db = MySQLdb.connect(**connection_params)
 
+
 def main():
+	insert_player_stats()
+	update_player_vals()
+	generate_pf()
+	calc_pf_value()
+	return
+
+
+# TODO make sure to only insert new games
+# TODO retreive player codes from db and then iterate
+def insert_player_stats():
 
 	team_codes = ['cle','gsw']
-	team_codes = ['cle']
 
 	rosters = []
 	stats   = []
@@ -35,10 +47,78 @@ def main():
 			stat = get_stats(player.get('player_url'))
 			load_stats(stat)
 			stats.append(stat)
-
 	return
 
 
+# compute sum of indices over average stats
+def update_player_vals():
+	
+	c = db.cursor()
+	c.execute("truncate table PLAYER_VALS;")
+	db.commit()
+
+	c.execute("""insert into PLAYER_VALS
+		SELECT s.PID, 
+		       AVG(s.POINTS)/a.AVG_POINTS + 
+		       AVG(s.STEALS)/a.AVG_STEALS +
+		       AVG(s.ASSISTS)/a.AVG_ASSISTS +
+		       AVG(s.REBOUNDS)/a.REBOUNDS as VALUE
+		FROM STATS s, (SELECT AVG(POINTS) AVG_POINTS, 
+				       AVG(STEALS) AVG_STEALS, 
+				       AVG(ASSISTS) AVG_ASSISTS, 
+				       AVG(REBOUNDS) REBOUNDS 
+				FROM STATS) a
+		GROUP BY s.PID;""")
+	db.commit()
+	return
+
+
+# sample users for the project
+def generate_users():
+	c = db.cursor()
+	for i,name in enumerate(['Mike','Sarah','John','Michelle']):
+		c.execute("""insert into USERS (UID,NAME)
+				values ('{}','{}')""".format(i,name))
+		db.commit()
+	return
+
+
+# sample portfolio selection for the project
+def generate_pf():
+	c = db.cursor()
+	
+	c.execute('truncate table PF;')
+	db.commit()
+
+	c.execute('select UID from USERS;')
+	users = [user[0] for user in c.fetchall()]
+	
+	c.execute('select PID from PLAYERS;')
+	players = [player[0] for player in c.fetchall()]
+	
+	for user in users:
+		selection = random.sample(range(len(players)),5)
+		for_insert = [(user,players[idx]) for idx in selection]
+		c.executemany('''insert into PF
+				values (%s,%s)''',for_insert)
+		db.commit()
+	return
+
+
+# calculate portfolio value based on player valuations and user selected portfolio
+def calc_pf_value():
+	c = db.cursor()
+	c.execute('truncate table PF_VALUE;')
+	db.commit()
+
+	c.execute('''insert into PF_VALUE
+			select a.UID, sum(b.VALUE) as VALUE
+			from PF a
+			inner join PLAYER_VALS b
+			on a.PID = b.PID
+			group by a.UID''')
+	db.commit()
+	return
 
 
 def load_roster(roster):
@@ -53,6 +133,7 @@ def load_roster(roster):
 	db.commit()
 	c.close()
 	return
+
 
 def load_stats(stat):
 
@@ -70,6 +151,7 @@ def load_stats(stat):
 	return
 
 
+# gets roster by team code
 def get_roster(team_code):
 	baseurl = 'http://espn.go.com/nba/team/roster/_/name/{}'.format(team_code)
 	html    = urllib.urlopen(baseurl)
@@ -96,6 +178,9 @@ def get_roster(team_code):
 	
 	return players
 
+
+# TODO generate url based on PID
+# gets stats on a per player basis
 def get_stats(player_url,full_stats=False):
 	
 	player_id   = player_url.split('/')[-2]
