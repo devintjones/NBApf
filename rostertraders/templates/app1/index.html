@@ -1,0 +1,25 @@
+{% extends 'app1/base.html' %}
+
+
+{% block hero_block %}
+<div class="starter-template">
+    <h1>Welcome to Roster Traders</h1>
+    <p class="lead">Where you can trade shares of players like a stock exhcnage!</p>
+</div>
+{% endblock %}
+
+{% block body_block %}
+      <form class="form-signin">
+        <h2 class="form-signin-heading">Please sign in</h2>
+        <label for="inputEmail" class="sr-only">Email address</label>
+        <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" value="remember-me"> Remember me
+          </label>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+      </form>
+{% endblock%}
