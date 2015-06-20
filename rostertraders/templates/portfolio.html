@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block body_block %}
+
+
+<div class="row">
+	<div class="col-xs-6">
+
+		{% if portfolio %}
+		<h2>Your current portfolio</h2>
+		<table class="table table-bordered table-striped table-condensed center">
+			<thead>
+				<tr>
+					<th>Player Name</th>
+					<th>Shares</th>
+					<th>Value</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for player in portfolio %}
+				<tr>
+					<td>{{ player.pid.name }}</a></td>	
+					<td>{{ player.shares }}</a></td>
+					<td>{{ player.shares * player.pid.playervals_set.get().value }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+		{% else %}
+		    <p>You haven't selected any players for your portfolio yet</p>
+		{% endif %}
+
+	</div>
+
+	<div class="col-xs-6">
+
+		<h2>Portfolio Value</h2>
+		<table class="table table-bordered table-striped table-condensed center">
+			<tr>
+				<th>Net worth</th>
+				<td>$1,000,000</td>
+			</tr>
+			<tr>
+				<th>Assets</th>
+				<td>$500,000</td>
+			</tr>
+			<tr>
+				<th>Cash</th>
+				<td>$500,000</td>
+			</tr>
+		</table>
+	</div>
+</div><!-- end div row dashboard --!>
+
+<div class="row">
+
+
+</div><!-- end div row execute button --!>
+
+<div class="player-stats container" >
+	{% if player_list %}
+	<h2>Player Stats and Valuations</h2>
+	<table class="table table-bordered table-striped table-condensed center">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Value</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for player in player_list %}
+			<tr>
+				<td><a href="/app1/{{ player.pid }}/">{{ player.pid.name }}</a></td>
+				<td>{{ player.value }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+{% else %}
+    <p>No Players in DB!.</p>
+{% endif %}
+</div>
+{% endblock %}
+

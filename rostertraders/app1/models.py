@@ -12,23 +12,7 @@ from __future__ import unicode_literals
 from django.db import models
 
 
-class Pf(models.Model):
-    UID = models.ForeignKey('Users', db_column='UID')  # Field name made lowercase.
-    PID = models.CharField(db_column='PID', max_length=20)  # Field name made lowercase.
 
-    class Meta:
-        managed = False
-        db_table = 'PF'
-        unique_together = (('UID', 'PID'),)
-
-
-class PfValue(models.Model):
-    uid = models.ForeignKey('Users', db_column='UID', primary_key=True)  # Field name made lowercase.
-    value = models.FloatField(db_column='VALUE', blank=True, null=True)  # Field name made lowercase.
-
-    class Meta:
-        managed = False
-        db_table = 'PF_VALUE'
 
 
 class Players(models.Model):
@@ -42,7 +26,7 @@ class Players(models.Model):
 
 
 class PlayerVals(models.Model):
-    pid = models.ForeignKey(Players, db_column='PID', primary_key=True)  # Field name made lowercase.
+    pid = models.ForeignKey(Players,db_column='PID',primary_key=True)
     value = models.FloatField(db_column='VALUE', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
@@ -51,8 +35,8 @@ class PlayerVals(models.Model):
 
 
 class Stats(models.Model):
-    PID = models.ForeignKey(Players, db_column='PID')  # Field name made lowercase.
-    GAMEID = models.CharField(db_column='GAMEID', max_length=20)  # Field name made lowercase.
+    pid = models.ForeignKey(Players,db_column='pid')
+    gameid = models.CharField(db_column='gameid',max_length=20, blank=True, null=True)
     points = models.IntegerField(db_column='POINTS', blank=True, null=True)  # Field name made lowercase.
     steals = models.IntegerField(db_column='STEALS', blank=True, null=True)  # Field name made lowercase.
     rebounds = models.IntegerField(db_column='REBOUNDS', blank=True, null=True)  # Field name made lowercase.
@@ -61,7 +45,6 @@ class Stats(models.Model):
     class Meta:
         managed = False
         db_table = 'STATS'
-        unique_together = (('GAMEID', 'PID'),)
 
 
 class Users(models.Model):
@@ -85,24 +68,24 @@ class AuthGroup(models.Model):
 
 
 class AuthGroupPermissions(models.Model):
-    group_id = models.ForeignKey(AuthGroup)
-    permission_id = models.ForeignKey('AuthPermission')
+    group = models.ForeignKey(AuthGroup)
+    permission = models.ForeignKey('AuthPermission')
 
     class Meta:
         managed = False
         db_table = 'auth_group_permissions'
-        unique_together = (('group_id', 'permission_id'),)
+        unique_together = (('group', 'permission'),)
 
 
 class AuthPermission(models.Model):
     name = models.CharField(max_length=255)
-    content_type_id = models.ForeignKey('DjangoContentType')
+    content_type = models.ForeignKey('DjangoContentType')
     codename = models.CharField(max_length=100)
 
     class Meta:
         managed = False
         db_table = 'auth_permission'
-        unique_together = (('content_type_id', 'codename'),)
+        unique_together = (('content_type', 'codename'),)
 
 
 class AuthUser(models.Model):
@@ -123,23 +106,23 @@ class AuthUser(models.Model):
 
 
 class AuthUserGroups(models.Model):
-    user_id = models.ForeignKey(AuthUser)
-    group_id = models.ForeignKey(AuthGroup)
+    user = models.ForeignKey(AuthUser)
+    group = models.ForeignKey(AuthGroup)
 
     class Meta:
         managed = False
         db_table = 'auth_user_groups'
-        unique_together = (('user_id', 'group_id'),)
+        unique_together = (('user', 'group'),)
 
 
 class AuthUserUserPermissions(models.Model):
-    user_id = models.ForeignKey(AuthUser)
-    permission_id = models.ForeignKey(AuthPermission)
+    user = models.ForeignKey(AuthUser)
+    permission = models.ForeignKey(AuthPermission)
 
     class Meta:
         managed = False
         db_table = 'auth_user_user_permissions'
-        unique_together = (('user_id', 'permission_id'),)
+        unique_together = (('user', 'permission'),)
 
 
 class DjangoAdminLog(models.Model):
@@ -184,3 +167,78 @@ class DjangoSession(models.Model):
     class Meta:
         managed = False
         db_table = 'django_session'
+
+
+class SocialAuthAssociation(models.Model):
+    server_url = models.CharField(max_length=255)
+    handle = models.CharField(max_length=255)
+    secret = models.CharField(max_length=255)
+    issued = models.IntegerField()
+    lifetime = models.IntegerField()
+    assoc_type = models.CharField(max_length=64)
+
+    class Meta:
+        managed = False
+        db_table = 'social_auth_association'
+
+
+class SocialAuthCode(models.Model):
+    email = models.CharField(max_length=254)
+    code = models.CharField(max_length=32)
+    verified = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'social_auth_code'
+        unique_together = (('email', 'code'),)
+
+
+class SocialAuthNonce(models.Model):
+    server_url = models.CharField(max_length=255)
+    timestamp = models.IntegerField()
+    salt = models.CharField(max_length=65)
+
+    class Meta:
+        managed = False
+        db_table = 'social_auth_nonce'
+
+
+class SocialAuthUsersocialauth(models.Model):
+    provider = models.CharField(max_length=32)
+    uid = models.CharField(max_length=255)
+    extra_data = models.TextField()
+    user = models.ForeignKey(AuthUser)
+
+    class Meta:
+        managed = False
+        db_table = 'social_auth_usersocialauth'
+        unique_together = (('provider', 'uid'),)
+
+
+
+class Pf(models.Model):
+    uid    = models.ForeignKey(SocialAuthUsersocialauth,db_column='uid')
+    pid    = models.ForeignKey(Players,db_column='pid')
+    id     = models.CharField(db_column='id',primary_key=True, max_length=20)
+    shares = models.IntegerField(db_column="shares")
+
+    #def __unicode__(self):
+	#            return self.pid.pid,self.shares
+
+
+    def player_pf_val(self):
+	    return int(unicode(self.shares)) * PlayerVals.objects.filter(pid=unicode(self.pid.pid))[0].value
+
+
+    class Meta:
+        managed = False
+        db_table = 'PF'
+
+
+class PfValue(models.Model):
+    uid = models.ForeignKey(SocialAuthUsersocialauth,db_column='uid',primary_key=True)
+    value = models.FloatField(db_column='VALUE', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'PF_VALUE'

@@ -13,15 +13,18 @@ Including another URLconf
     1. Add an import:  from blog import urls as blog_urls
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
-from django.conf.urls import include, url
+from django.conf.urls import patterns,include, url
 from django.contrib import admin
 from django.conf.urls.static import static
 
 
-
 urlpatterns = [
-	url(r'^login/$', 'django.contrib.auth.views.login'),
-        url(r'^logout/$', 'django.contrib.auth.views.logout'),
+	#url(r'^login/$', 'django.contrib.auth.views.login'),
+	#url(r'^logout/$', 'django.contrib.auth.views.logout'),
+	url(r'^players','app1.views.player_vals'),
 	url(r'^$', include('app1.urls')),
+	url('', include('social.apps.django_app.urls', namespace='social')),
+	url(r'^home/$',   'app1.views.index'),
+	url(r'^logout/$', 'app1.views.logout'),
 	url(r'^admin/', include(admin.site.urls)),
 ]

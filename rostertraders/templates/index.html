@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+
+{% block hero_block %}
+<div class="pad-center">
+    <h1>Welcome to Roster Traders</h1>
+    <p class="lead">Where you can trade shares of players like a stock exhcnage!</p>
+</div>
+{% endblock %}
+
+{% block body_block %}
+
+{% if user and not user.is_anonymous %}
+
+<div class="pad-center">
+  <a class="lead">Hello, {{ user.get_full_name }}!</a>
+  <br>
+  <a class="lead" href="/logout">Logout</a>
+{% else %}
+  <a class="lead" href="{% url 'social:begin' 'facebook' %}?next={{ request.path }}">Login with Facebook</a>
+{% endif %}
+
+</div>
+{% endblock%}

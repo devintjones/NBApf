@@ -20,7 +20,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '!5(0b93dslv(75gt($gp#(^%2j$9tudermpukk_4(m3^#(c99p'
+SECRET_KEY          = os.environ["RT_DJANGO_SECRET"]
+FACEBOOK_APP_ID     = os.environ["RT_FB_APPID"]
+FACEBOOK_API_SECRET = os.environ["RT_FB_SECRET"]
+
+SOCIAL_AUTH_FACEBOOK_KEY    = os.environ["RT_FB_APPID"]
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ["RT_FB_SECRET"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,7 +43,18 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app1',
+    'social.apps.django_app.default',
 )
+
+
+AUTHENTICATION_BACKENDS = (
+    'social.backends.facebook.FacebookOAuth2',
+    'social.backends.google.GoogleOAuth2',
+    'social.backends.twitter.TwitterOAuth',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -52,6 +68,20 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'rostertraders.urls'
+
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.core.context_processors.tz',
+    'django.contrib.messages.context_processors.messages',
+    'social.apps.django_app.context_processors.backends',
+    'social.apps.django_app.context_processors.login_redirect',
+)
+
 
 TEMPLATES = [
     {
@@ -112,3 +142,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
+
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/home/'
+SOCIAL_AUTH_LOGIN_URL = '/'
