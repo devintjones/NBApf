@@ -233,7 +233,7 @@ class Pf(models.Model):
         unique_together = (('user', 'pid'),)
 
 class PfValue(models.Model):
-    user = models.ForeignKey(Pf,db_column='user',primary_key=True)
+    user = models.ForeignKey(AuthUser,db_column='user',primary_key=True)
     #assets = models.FloatField(db_column='assets', blank=True, null=True)  # Field name made lowercase.
     cash = models.FloatField(db_column='cash')
 

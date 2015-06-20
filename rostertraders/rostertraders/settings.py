@@ -108,11 +108,11 @@ WSGI_APPLICATION = 'rostertraders.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'NBAPF',
-	'USER': 'root',
-	'PASSWORD': 'root',
-	'HOST': '',
-	'PORT':'',
+        'NAME': 'cs4111',
+	'USER': 'ua2144',
+	'PASSWORD': os.environ["AWS_RDS_PW"],
+	'HOST': 'cs4111.ccwfefuonoiq.us-west-2.rds.amazonaws.com',
+	'PORT':'3306',
     }
 }
 

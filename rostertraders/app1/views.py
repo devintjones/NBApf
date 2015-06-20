@@ -25,9 +25,11 @@ def player_vals(request):
 	this_user = request.user
 	pf_contents = Pf.objects.filter(user=this_user.id).select_related('pid').all()
 
-	# get user value
+	# get user value or initialize a new one
+	user_pf,created   = PfValue.objects.get_or_create(user=this_user.id,
+						defaults={'user': AuthUser.objects.get(id=this_user.id),
+							'cash'  : 10000})
 
-	user_pf   = PfValue.objects.get(user=int(this_user.id))
 
 	print user_pf
 	context   = {'player_list' : player_values,
@@ -62,7 +64,7 @@ def buy_shares(request):
 	for pid,share_num in request.POST.iteritems():
 		if pid != 'csrfmiddlewaretoken' and share_num !='':
 			
-			# update or create entry in portfolio (with added logic than update_or_create() )
+			# update or create entry in portfolio (with more logic than django update_or_create() )
 			try:
 				entry        = Pf.objects.get(user=this_user.id,pid=pid)
 				entry.shares += int(share_num)
@@ -77,9 +79,9 @@ def buy_shares(request):
 
 			# update cash value
 			player_share_price = PlayerVals.objects.get(pid=pid).value
-			cash_add           = int(share_num) * player_share_price
+			less_cash          = int(share_num) * player_share_price
 			user_pf            = PfValue.objects.get(user=this_user.id)
-			user_pf.cash       -= cash_add
+			user_pf.cash       -= less_cash
 			user_pf.save()
 	return HttpResponseRedirect('/players')
 
