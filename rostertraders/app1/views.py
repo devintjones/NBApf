@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from social_auth import __version__ as version
 
 
-from .models import Players, PlayerVals, Pf
+from .models import Players, PlayerVals, Pf, PfValue
 
 
 def index(request):
@@ -21,18 +21,25 @@ def player_vals(request):
 	player_values = PlayerVals.objects.order_by('-value')
 	player_values = player_values.select_related('pid').all()
 	
-	# get user portfolio
+	# get user portfolio contents
 	this_user = request.user
-	#portfolio = Pf.objects.filter(uid=0).select_related('pid')
-	portfolio = Pf.objects.filter(uid=this_user.id).select_related('pid').all()
-	
+	portfolio = Pf.objects.filter(user=this_user.id).select_related('pid').all()
+
+	# get user value
+	user_value = PfValue.objects.filter(user=0)[0]
+
 	context     = {'player_list' : player_values,
-			'portfolio'  : portfolio}
+			'portfolio'  : portfolio,
+			'user_value' : user_value}
 	return render(request,'portfolio.html',context)
 
-def trade(request):
-
-	# execute sql query for post request
+def sell_shares(request):
+	print(request.POST.keys())
+	for pid,share_num in request.POST.iteritems():
+		if pid != 'csrfmiddlewaretoken' and share_num !='':
+			entry = Pf.objects.get(user=request.user.id,pid=pid)
+			entry.shares = entry.shares - int(share_num)
+			entry.save()
 
 	return HttpResponseRedirect('/players')
 

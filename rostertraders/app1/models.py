@@ -217,27 +217,33 @@ class SocialAuthUsersocialauth(models.Model):
 
 
 class Pf(models.Model):
-    uid    = models.ForeignKey(SocialAuthUsersocialauth,db_column='uid')
+    user   = models.ForeignKey(SocialAuthUsersocialauth,db_column='user')
     pid    = models.ForeignKey(Players,db_column='pid')
     id     = models.CharField(db_column='id',primary_key=True, max_length=20)
     shares = models.IntegerField(db_column="shares")
 
-    #def __unicode__(self):
-	#            return self.pid.pid,self.shares
-
-
+    # calculated field
+    @property
     def player_pf_val(self):
-	    return int(unicode(self.shares)) * PlayerVals.objects.filter(pid=unicode(self.pid.pid))[0].value
-
-
+        return self.shares * PlayerVals.objects.filter(pid=self.pid.pid)[0].value
+    
     class Meta:
         managed = False
         db_table = 'PF'
 
 
 class PfValue(models.Model):
-    uid = models.ForeignKey(SocialAuthUsersocialauth,db_column='uid',primary_key=True)
-    value = models.FloatField(db_column='VALUE', blank=True, null=True)  # Field name made lowercase.
+    user = models.ForeignKey(Pf,db_column='user',primary_key=True)
+    #assets = models.FloatField(db_column='assets', blank=True, null=True)  # Field name made lowercase.
+    cash = models.FloatField(db_column='cash')
+
+    @property
+    def assets(self):
+	return sum([player.player_pf_val for player in Pf.objects.filter(user=0).all()])
+
+    @property
+    def net_worth(self):
+        return self.assets + self.cash
 
     class Meta:
         managed = False

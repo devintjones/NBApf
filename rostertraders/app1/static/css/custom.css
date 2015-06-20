@@ -64,3 +64,7 @@ table.center {
 	margin-left:auto;
 	margin-right:auto;
 }
+
+input[type=number]{
+	width: 60px; 
+}

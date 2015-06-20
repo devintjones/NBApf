@@ -8,12 +8,15 @@
 
 		{% if portfolio %}
 		<h2>Your current portfolio</h2>
+		<form action="/sell_shares/" method="post">
+		{% csrf_token %}
 		<table class="table table-bordered table-striped table-condensed center">
 			<thead>
 				<tr>
 					<th>Player Name</th>
 					<th>Shares</th>
 					<th>Value</th>
+					<th>Sell Shares</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -21,12 +24,14 @@
 				<tr>
 					<td>{{ player.pid.name }}</a></td>	
 					<td>{{ player.shares }}</a></td>
-					<td>{{ player.shares * player.pid.playervals_set.get().value }}</td>
+					<td>${{ player.player_pf_val|floatformat:2 }}</td>
+					<td><input type="number" min="0" max="500" name="{{ player.pid_id }}" ></td>
 				</tr>
 				{% endfor %}
 			</tbody>
 		</table>
-
+		<input class="btn btn-lg btn-primary btn-block" type="submit" value="Execute Sale">
+		</form>
 		{% else %}
 		    <p>You haven't selected any players for your portfolio yet</p>
 		{% endif %}
@@ -39,15 +44,15 @@
 		<table class="table table-bordered table-striped table-condensed center">
 			<tr>
 				<th>Net worth</th>
-				<td>$1,000,000</td>
+				<td>${{ user_value.net_worth|floatformat:2}}</td>
 			</tr>
 			<tr>
 				<th>Assets</th>
-				<td>$500,000</td>
+				<td>${{ user_value.assets|floatformat:2 }}</td>
 			</tr>
 			<tr>
 				<th>Cash</th>
-				<td>$500,000</td>
+				<td>${{ user_value.cash|floatformat:2 }}</td>
 			</tr>
 		</table>
 	</div>
@@ -61,23 +66,26 @@
 <div class="player-stats container" >
 	{% if player_list %}
 	<h2>Player Stats and Valuations</h2>
+	<form>
 	<table class="table table-bordered table-striped table-condensed center">
 		<thead>
 			<tr>
 				<th>Name</th>
-				<th>Value</th>
+				<th>Share Price</th>
+				<th>Buy Shares</th>
 			</tr>
 		</thead>
 		<tbody>
 			{% for player in player_list %}
 			<tr>
 				<td><a href="/app1/{{ player.pid }}/">{{ player.pid.name }}</a></td>
-				<td>{{ player.value }}</td>
+				<td>${{ player.value|floatformat:2 }}</td>
+				<td><input type="number" min="0" max="500" name="{{ player.pid_id}}"></td>
 			</tr>
 			{% endfor %}
 		</tbody>
 	</table>
-
+	</form>
 {% else %}
     <p>No Players in DB!.</p>
 {% endif %}
