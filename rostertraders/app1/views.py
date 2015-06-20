@@ -23,12 +23,13 @@ def player_vals(request):
 	
 	# get user portfolio contents
 	this_user = request.user
-	print type(this_user)
 	pf_contents = Pf.objects.filter(user=this_user.id).select_related('pid').all()
 
 	# get user value
+
 	user_pf   = PfValue.objects.get(user=int(this_user.id))
 
+	print user_pf
 	context   = {'player_list' : player_values,
 			'pf_contents'  : pf_contents,
 			'user_pf' : user_pf}
@@ -55,9 +56,9 @@ def sell_shares(request):
 	return HttpResponseRedirect('/players')
 
 
+# update portfolio holdings and cash value
 def buy_shares(request):
 	this_user = request.user
-	print request.POST
 	for pid,share_num in request.POST.iteritems():
 		if pid != 'csrfmiddlewaretoken' and share_num !='':
 			

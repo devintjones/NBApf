@@ -225,7 +225,7 @@ class Pf(models.Model):
     # calculated field
     @property
     def player_pf_val(self):
-        return self.shares * PlayerVals.objects.filter(pid=self.pid.pid)[0].value
+        return self.shares * PlayerVals.objects.get(pid=self.pid.pid).value
     
     class Meta:
         managed = False
@@ -239,7 +239,7 @@ class PfValue(models.Model):
 
     @property
     def assets(self):
-	return sum([player.player_pf_val for player in Pf.objects.filter(user=0).all()])
+	return sum([player.player_pf_val for player in Pf.objects.filter(user=self.user_id).all()])
 
     @property
     def net_worth(self):
