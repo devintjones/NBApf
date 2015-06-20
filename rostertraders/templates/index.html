@@ -13,11 +13,11 @@
 {% if user and not user.is_anonymous %}
 
 <div class="pad-center">
-  <a class="lead">Hello, {{ user.get_full_name }}!</a>
-  <br>
-  <a class="lead" href="/logout">Logout</a>
+  <form action="/players">
+  <input class="btn btn-lg btn-primary" type="submit" value="Start Trading!">
+  </form>
 {% else %}
-  <a class="lead" href="{% url 'social:begin' 'facebook' %}?next={{ request.path }}">Login with Facebook</a>
+  <a class="lead" href="{% url 'social:begin' 'facebook' %}?next={{ request.path }}">Login with Facebook to start trading</a>
 {% endif %}
 
 </div>

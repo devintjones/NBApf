@@ -3,6 +3,7 @@ from django.http import HttpResponse,HttpResponseRedirect
 from django.template import RequestContext
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from social_auth import __version__ as version
 
@@ -13,6 +14,11 @@ from .models import Players, PlayerVals, Pf, PfValue, AuthUser
 def index(request):
 	return render_to_response('index.html', context_instance=RequestContext(request))
 
+def contact(request):
+	return render_to_response('contact.html', context_instance=RequestContext(request))
+
+def home(request):
+	return HttpResponseRedirect('/players')
 
 @login_required(login_url='/login/facebook')
 def player_vals(request):
@@ -41,19 +47,27 @@ def player_vals(request):
 # update portfolio holdings and cash value
 def sell_shares(request):
 	this_user = request.user
+	success=True
 	for pid,share_num in request.POST.iteritems():
 		if pid != 'csrfmiddlewaretoken' and share_num !='':
+			share_num = int(share_num)	
 			# update user portfolio share values
 			entry        = Pf.objects.get(user=this_user.id,pid=pid)
-			entry.shares -= int(share_num)
+			if entry.shares < share_num:
+				messages.error(request,"Sorry bro, you don't own enough shares to complete that trade!")
+				success=False
+				break
+			entry.shares -= share_num
 			entry.save()
 			
 			# update cash value
 			player_share_price = PlayerVals.objects.get(pid=pid).value
-			cash_add           = int(share_num) * player_share_price
+			cash_add           = share_num * player_share_price
 			user_pf            = PfValue.objects.get(user=this_user.id)
 			user_pf.cash       += cash_add
 			user_pf.save()
+
+	if success: messages.success(request,"Trade excuted successfuly!")
 
 	return HttpResponseRedirect('/players')
 
@@ -61,8 +75,21 @@ def sell_shares(request):
 # update portfolio holdings and cash value
 def buy_shares(request):
 	this_user = request.user
+	success=True
 	for pid,share_num in request.POST.iteritems():
 		if pid != 'csrfmiddlewaretoken' and share_num !='':
+			
+			# update cash value
+			player_share_price = PlayerVals.objects.get(pid=pid).value
+			less_cash          = int(share_num) * player_share_price
+			user_pf            = PfValue.objects.get(user=this_user.id)
+			if user_pf > less_cash:
+				messages.error(request,"Sorry bro, you don't have enough cash to complete that trade!")
+				success=False
+				break
+
+			user_pf.cash       -= less_cash
+			user_pf.save()
 			
 			# update or create entry in portfolio (with more logic than django update_or_create() )
 			try:
@@ -77,12 +104,8 @@ def buy_shares(request):
 								id='{}{}'.format(pid,share_num),shares=int(share_num))
 				entry.save()
 
-			# update cash value
-			player_share_price = PlayerVals.objects.get(pid=pid).value
-			less_cash          = int(share_num) * player_share_price
-			user_pf            = PfValue.objects.get(user=this_user.id)
-			user_pf.cash       -= less_cash
-			user_pf.save()
+	if success: messages.success(request,"Trade excuted successfuly!")
+
 	return HttpResponseRedirect('/players')
 
 

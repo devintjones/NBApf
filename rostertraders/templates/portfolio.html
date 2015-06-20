@@ -2,6 +2,14 @@
 
 {% block body_block %}
 
+{% if messages %}
+	{% for message in messages %}
+	<div class="pad-center messages">
+		<p class="lead"> {{ message }}</p>
+	</div>
+	{% endfor %}
+{% endif %}
+
 
 <div class="row">
 	<div class="col-xs-6">
@@ -25,7 +33,7 @@
 					<td><a href="/app1/{{ player.pid }}/">{{ player.pid.name }}</a></a></td>	
 					<td>{{ player.shares }}</a></td>
 					<td>${{ player.player_pf_val|floatformat:2 }}</td>
-					<td><input type="number" min="0" max="500" name="{{ player.pid_id }}" ></td>
+					<td><input type="number" min="0" step="100" name="{{ player.pid_id }}" ></td>
 				</tr>
 				{% endfor %}
 			</tbody>
@@ -82,7 +90,7 @@
 			<tr>
 				<td><a href="/app1/{{ player.pid }}/">{{ player.pid.name }}</a></td>
 				<td>${{ player.value|floatformat:2 }}</td>
-				<td><input type="number" min="0" max="500" name="{{ player.pid_id}}"></td>
+				<td><input type="number" min="0" step="100" name="{{ player.pid_id}}"></td>
 			</tr>
 			{% endfor %}
 		</tbody>
