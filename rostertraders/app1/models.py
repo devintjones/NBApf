@@ -217,10 +217,10 @@ class SocialAuthUsersocialauth(models.Model):
 
 
 class Pf(models.Model):
-    user   = models.ForeignKey(SocialAuthUsersocialauth,db_column='user')
+    user   = models.ForeignKey(AuthUser,db_column='user')
     pid    = models.ForeignKey(Players,db_column='pid')
-    id     = models.CharField(db_column='id',primary_key=True, max_length=20)
     shares = models.IntegerField(db_column="shares")
+    id     = models.CharField(max_length=20,primary_key=True)
 
     # calculated field
     @property
@@ -230,7 +230,7 @@ class Pf(models.Model):
     class Meta:
         managed = False
         db_table = 'PF'
-
+        unique_together = (('user', 'pid'),)
 
 class PfValue(models.Model):
     user = models.ForeignKey(Pf,db_column='user',primary_key=True)

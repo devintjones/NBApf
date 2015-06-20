@@ -6,7 +6,7 @@
 <div class="row">
 	<div class="col-xs-6">
 
-		{% if portfolio %}
+		{% if pf_contents %}
 		<h2>Your current portfolio</h2>
 		<form action="/sell_shares/" method="post">
 		{% csrf_token %}
@@ -20,9 +20,9 @@
 				</tr>
 			</thead>
 			<tbody>
-				{% for player in portfolio %}
+				{% for player in pf_contents %}
 				<tr>
-					<td>{{ player.pid.name }}</a></td>	
+					<td><a href="/app1/{{ player.pid }}/">{{ player.pid.name }}</a></a></td>	
 					<td>{{ player.shares }}</a></td>
 					<td>${{ player.player_pf_val|floatformat:2 }}</td>
 					<td><input type="number" min="0" max="500" name="{{ player.pid_id }}" ></td>
@@ -30,7 +30,7 @@
 				{% endfor %}
 			</tbody>
 		</table>
-		<input class="btn btn-lg btn-primary btn-block" type="submit" value="Execute Sale">
+		<input class="btn btn-lg btn-danger btn-block" type="submit" value="Sell Shares">
 		</form>
 		{% else %}
 		    <p>You haven't selected any players for your portfolio yet</p>
@@ -44,15 +44,15 @@
 		<table class="table table-bordered table-striped table-condensed center">
 			<tr>
 				<th>Net worth</th>
-				<td>${{ user_value.net_worth|floatformat:2}}</td>
+				<td>${{ user_pf.net_worth|floatformat:2}}</td>
 			</tr>
 			<tr>
 				<th>Assets</th>
-				<td>${{ user_value.assets|floatformat:2 }}</td>
+				<td>${{ user_pf.assets|floatformat:2 }}</td>
 			</tr>
 			<tr>
 				<th>Cash</th>
-				<td>${{ user_value.cash|floatformat:2 }}</td>
+				<td>${{ user_pf.cash|floatformat:2 }}</td>
 			</tr>
 		</table>
 	</div>
@@ -66,7 +66,9 @@
 <div class="player-stats container" >
 	{% if player_list %}
 	<h2>Player Stats and Valuations</h2>
-	<form>
+	<form action="/buy_shares/" method="post">
+	{% csrf_token %}
+	<input class="btn btn-lg btn-success btn-block" type="submit" value="Buy Shares">
 	<table class="table table-bordered table-striped table-condensed center">
 		<thead>
 			<tr>
