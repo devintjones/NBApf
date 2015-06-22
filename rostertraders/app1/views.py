@@ -54,7 +54,7 @@ def sell_shares(request):
 			# update user portfolio share values
 			entry        = Pf.objects.get(user=this_user.id,pid=pid)
 			if entry.shares < share_num:
-				messages.error(request,"Sorry bro, you don't own enough shares to complete that trade!")
+				messages.error(request,"Sorry, you don't own enough shares to complete that trade!")
 				success=False
 				break
 			entry.shares -= share_num
@@ -83,8 +83,8 @@ def buy_shares(request):
 			player_share_price = PlayerVals.objects.get(pid=pid).value
 			less_cash          = int(share_num) * player_share_price
 			user_pf            = PfValue.objects.get(user=this_user.id)
-			if user_pf > less_cash:
-				messages.error(request,"Sorry bro, you don't have enough cash to complete that trade!")
+			if user_pf.cash < less_cash:
+				messages.error(request,"Sorry, you don't have enough cash to complete that trade!")
 				success=False
 				break
 
